@@ -9,6 +9,24 @@ pub trait CheckParameters<CommE>: private::Sealed {
     fn check_if_position_is_appropriate(position: u8) -> Result<(), Error<CommE>>;
 }
 
+impl<CommE> CheckParameters<CommE> for ic::Mcp401x {
+    fn check_if_channel_is_appropriate(channel: Channel) -> Result<(), Error<CommE>> {
+        if channel == Channel::Ch0 || channel == Channel::All {
+            Ok(())
+        } else {
+            Err(Error::WrongChannel)
+        }
+    }
+
+    fn check_if_position_is_appropriate(position: u8) -> Result<(), Error<CommE>> {
+        if position <= 127 {
+            Ok(())
+        } else {
+            Err(Error::OutOfBounds)
+        }
+    }
+}
+
 impl<CommE> CheckParameters<CommE> for ic::Mcp41x {
     fn check_if_channel_is_appropriate(channel: Channel) -> Result<(), Error<CommE>> {
         if channel == Channel::Ch0 || channel == Channel::All {
@@ -56,6 +74,21 @@ where
     pub fn shutdown(&mut self, channel: Channel) -> Result<(), Error<CommE>> {
         IC::check_if_channel_is_appropriate(channel)?;
         self.iface.write_command(Command::Shutdown(channel))
+    }
+}
+
+impl<I2C> Mcp4x<interface::I2cInterface<I2C>, ic::Mcp401x> {
+    /// Create new MCP401x device instance
+    pub fn new_mcp401x(i2c: I2C) -> Self {
+        Mcp4x {
+            iface: interface::I2cInterface { i2c },
+            _ic: PhantomData,
+        }
+    }
+
+    /// Destroy driver instance, return I2C bus instance.
+    pub fn destroy_mcp401x(self) -> I2C {
+        self.iface.i2c
     }
 }
 
