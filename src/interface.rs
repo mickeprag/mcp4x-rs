@@ -1,6 +1,6 @@
 //! SPI interface
 
-use crate::{private, Error};
+use crate::{private, Command, Error};
 use embedded_hal::spi::SpiDevice;
 
 /// SPI interface
@@ -15,7 +15,7 @@ pub trait WriteCommand: private::Sealed {
     type Error;
 
     /// Command
-    fn write_command(&mut self, command: u8, data: u8) -> Result<(), Self::Error>;
+    fn write_command(&mut self, command: Command) -> Result<(), Self::Error>;
 }
 
 impl<SPI, E> WriteCommand for SpiInterface<SPI>
@@ -24,8 +24,8 @@ where
 {
     type Error = Error<E>;
 
-    fn write_command(&mut self, command: u8, data: u8) -> Result<(), Error<E>> {
-        let payload: [u8; 2] = [command, data];
+    fn write_command(&mut self, command: Command) -> Result<(), Self::Error> {
+        let payload: [u8; 2] = [command.get_command_byte(), command.get_data_byte()];
         self.spi.write(&payload).map_err(Error::Comm)
     }
 }

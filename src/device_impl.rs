@@ -35,9 +35,8 @@ where
     /// on the device.
     pub fn set_position(&mut self, channel: Channel, position: u8) -> Result<(), Error<CommE>> {
         IC::check_if_channel_is_appropriate(channel)?;
-        let cmd = Command::SetPosition(channel, position);
         self.iface
-            .write_command(cmd.get_command_byte(), cmd.get_data_byte())
+            .write_command(Command::SetPosition(channel, position))
     }
 
     /// Shutdown a channel.
@@ -46,9 +45,7 @@ where
     /// on the device.
     pub fn shutdown(&mut self, channel: Channel) -> Result<(), Error<CommE>> {
         IC::check_if_channel_is_appropriate(channel)?;
-        let cmd = Command::Shutdown(channel);
-        self.iface
-            .write_command(cmd.get_command_byte(), cmd.get_data_byte())
+        self.iface.write_command(Command::Shutdown(channel))
     }
 }
 
