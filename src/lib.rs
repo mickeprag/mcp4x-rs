@@ -128,6 +128,8 @@ pub enum Error<CommE> {
     Comm(CommE),
     /// Wrong channel for this device provided
     WrongChannel,
+    /// Unsupported feature
+    Unsupported,
 }
 
 /// SPI mode
@@ -184,6 +186,7 @@ mod private {
     pub trait Sealed {}
 
     impl<SPI> Sealed for interface::SpiInterface<SPI> {}
+    impl<I2C> Sealed for interface::I2cInterface<I2C> {}
     impl Sealed for ic::Mcp41x {}
     impl Sealed for ic::Mcp42x {}
 }
