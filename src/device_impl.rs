@@ -51,6 +51,11 @@ impl<CommE> CheckParameters<CommE> for ic::Mcp42x {
     }
 }
 
+#[maybe_async_cfg::maybe(
+    sync(cfg(not(feature = "async")),),
+    async(feature="async"),
+    keep_self
+)]
 impl<DI, IC, CommE> Mcp4x<DI, IC>
 where
     DI: interface::WriteCommand<Error = Error<CommE>>,
@@ -60,20 +65,21 @@ where
     ///
     /// Will return `Error::WrongChannel` if the channel provided is not available
     /// on the device.
-    pub fn set_position(&mut self, channel: Channel, position: u8) -> Result<(), Error<CommE>> {
+    pub async fn set_position(&mut self, channel: Channel, position: u8) -> Result<(), Error<CommE>> {
         IC::check_if_channel_is_appropriate(channel)?;
         IC::check_if_position_is_appropriate(position)?;
         self.iface
             .write_command(Command::SetPosition(channel, position))
+            .await
     }
 
     /// Shutdown a channel.
     ///
     /// Will return `Error::WrongChannel` if the channel provided is not available
     /// on the device.
-    pub fn shutdown(&mut self, channel: Channel) -> Result<(), Error<CommE>> {
+    pub async fn shutdown(&mut self, channel: Channel) -> Result<(), Error<CommE>> {
         IC::check_if_channel_is_appropriate(channel)?;
-        self.iface.write_command(Command::Shutdown(channel))
+        self.iface.write_command(Command::Shutdown(channel)).await
     }
 }
 

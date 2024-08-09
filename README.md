@@ -86,6 +86,15 @@ fn main() {
 }
 ```
 
+### Async support
+
+This library support async execution by adding the feature `async` to `Cargo.toml`:
+
+```toml
+[dependencies]
+mcp4x = { version = "1.1", features = ["async"] }
+```
+
 ## Support
 
 For questions, issues, feature requests like compatibility with similar devices and other changes, please file an
