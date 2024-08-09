@@ -173,7 +173,7 @@ pub struct Mcp4x<DI, IC> {
 }
 
 mod device_impl;
-pub use crate::device_impl::CheckChannel;
+pub use crate::device_impl::CheckParameters;
 
 mod commands;
 use crate::commands::Command;

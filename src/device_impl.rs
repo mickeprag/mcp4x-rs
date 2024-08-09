@@ -4,11 +4,12 @@ use crate::{ic, interface, private, Channel, Command, Error, Mcp4x};
 use core::marker::PhantomData;
 
 #[doc(hidden)]
-pub trait CheckChannel<CommE>: private::Sealed {
+pub trait CheckParameters<CommE>: private::Sealed {
     fn check_if_channel_is_appropriate(channel: Channel) -> Result<(), Error<CommE>>;
+    fn check_if_position_is_appropriate(position: u8) -> Result<(), Error<CommE>>;
 }
 
-impl<CommE> CheckChannel<CommE> for ic::Mcp41x {
+impl<CommE> CheckParameters<CommE> for ic::Mcp41x {
     fn check_if_channel_is_appropriate(channel: Channel) -> Result<(), Error<CommE>> {
         if channel == Channel::Ch0 || channel == Channel::All {
             Ok(())
@@ -16,10 +17,18 @@ impl<CommE> CheckChannel<CommE> for ic::Mcp41x {
             Err(Error::WrongChannel)
         }
     }
+
+    fn check_if_position_is_appropriate(_position: u8) -> Result<(), Error<CommE>> {
+        Ok(())
+    }
 }
 
-impl<CommE> CheckChannel<CommE> for ic::Mcp42x {
+impl<CommE> CheckParameters<CommE> for ic::Mcp42x {
     fn check_if_channel_is_appropriate(_: Channel) -> Result<(), Error<CommE>> {
+        Ok(())
+    }
+
+    fn check_if_position_is_appropriate(_position: u8) -> Result<(), Error<CommE>> {
         Ok(())
     }
 }
@@ -27,7 +36,7 @@ impl<CommE> CheckChannel<CommE> for ic::Mcp42x {
 impl<DI, IC, CommE> Mcp4x<DI, IC>
 where
     DI: interface::WriteCommand<Error = Error<CommE>>,
-    IC: CheckChannel<CommE>,
+    IC: CheckParameters<CommE>,
 {
     /// Set a channel to a position.
     ///
@@ -35,6 +44,7 @@ where
     /// on the device.
     pub fn set_position(&mut self, channel: Channel, position: u8) -> Result<(), Error<CommE>> {
         IC::check_if_channel_is_appropriate(channel)?;
+        IC::check_if_position_is_appropriate(position)?;
         self.iface
             .write_command(Command::SetPosition(channel, position))
     }
